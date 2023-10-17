@@ -1,2 +1,4 @@
 # игнорировать все файлы bootstrap
 boot*.*
+# игнорировать папку node_modules и файлы 
+node_modules/
