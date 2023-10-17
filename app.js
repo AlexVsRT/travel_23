@@ -5,17 +5,16 @@ const app = express(); //создаем объект приложение
 const urlencodedParser = express.urlencoded({ extended: false });
 //парсер URL – разбирает URL
 
+// сообщаем Node где лежат ресурсы сайта
+app.use(express.static(__dirname + '/public'));
+
 //создаем пул подключений к нашему серверу
 const pool = mysql.createPool({
     connectionLimit: 5,
-    host: "localhost",
-    //наш хостинг
-    user: "root",
-    //логин к нашей базе
-    database: "travel",
-    //наша база travel, созданная в прошлой работе
-    password: ""
-    //пароль к нашей базе
+    host: "localhost",      //наш хостинг
+    user: "root",           //логин к нашей базе
+    database: "travel",     //наша база travel, созданная в прошлой работе
+    password: ""            //пароль к нашей базе
 });
 //устанавливаем Handlebars в качестве движка представлений в Express
 app.set("view engine", "hbs");
@@ -26,8 +25,7 @@ app.post("/create", urlencodedParser, function (req, res) {
     const Name = req.body.name;
     const Login = req.body.login;
     const Pass = req.body.pass;
-    pool.query("INSERT INTO users (Name, Login, Pass) VALUES (?,?,?)", [Name,
-        Login, Pass], function (err, data) {
+    pool.query("INSERT INTO users (Name, Login, Pass) VALUES (?,?,?)", [Name, Login, Pass], function (err, data) {
             if (err) return console.log(err);
             //пока просто перенаправляем на index.hbs
             res.redirect("/");
