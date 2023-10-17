@@ -128,3 +128,7 @@ header div div a{
         font-size: 14px;
     }
 }
+
+#auth_blok a{
+    color: white;
+}

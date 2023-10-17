@@ -19,6 +19,23 @@ const pool = mysql.createPool({
 //устанавливаем Handlebars в качестве движка представлений в Express
 app.set("view engine", "hbs");
 
+// УСТАНОВКА МАРШРУТОВ
+// ===================================================
+// 
+
+// маршурут на главную страницу
+app.get("/", function(req, res){
+    res.render("index.hbs");
+});
+// возвращаем форму для добавления данных
+app.get("/create", function(req, res){
+    res.render("create.hbs");
+});
+// возвращаем браузеру форму для авторизации данных
+app.get("/avtoriz", function (req, res) {
+    res.render("avtoriz.hbs");
+});
+
 //получаем отправленные данные со страницы «Регистрация» create.hbs и добавляем их в БД
 app.post("/create", urlencodedParser, function (req, res) {
     if (!req.body) return res.sendStatus(400);
@@ -33,10 +50,7 @@ app.post("/create", urlencodedParser, function (req, res) {
             console.log("Добавил в базу");
         });
 });
-// возвращаем браузеру форму для авторизации данных
-app.get("/avtoriz", function (req, res) {
-    res.render("avtoriz.hbs");
-});
+
 app.listen(3000, function () {
     console.log("Сервер ожидает подключения...");
 });
