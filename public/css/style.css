@@ -23,7 +23,7 @@ header{
 #logo{
     max-width: 180px;
     max-height: 140px;
-    margin-left: 10px;
+    margin-left: 1%;
     margin-bottom: 10px;
 }
 .col-9{
@@ -47,13 +47,15 @@ a {
     display: flex;
     flex-flow: row wrap;
 }
-.tour p .tour img{
+.tour p {
     margin: 0 10px;
+    width: 50%;
 }
 .tour img {
     width: 250px;
     height: 170px;
     padding: 5px;
+    margin: 0 10px;
 }
 .tour label{
     text-align: left;
@@ -121,12 +123,20 @@ header div div a{
 }
 @media screen and (max-width:768px){
     #logo{
-        max-width: 100px;
+        max-width: 80px;
         max-height: 70px;
     }
     h1{
         font-size: 14px;
     }
+    .tour p {
+        margin: 0 10px;
+        width: 100%;
+    }  
+    #auth_blok a{
+        font-size: 8px;
+    }
+    
 }
 
 #auth_blok a{
