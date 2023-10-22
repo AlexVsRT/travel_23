@@ -1,16 +1,7 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="css/bootstrap.min.css">
-    <link rel="stylesheet" href="css/style.css">
-    <title>Travel-23</title>
-  </head>
   <body class ="body-top">
+    <!--частичное представление						-->
+		              {{> header}}
+
         <div class = "modal fade" id = "myModal" tabindex="-1" role = "dialog"
                     aria-labelledby="exampleModalScrollableTitle" aria-hidden="true">
             <div class = "modal-dialog modal-dialog-scrollable" role = "document">
@@ -76,33 +67,7 @@
                 </div>     
             </div>
         </div>
-    <header >
-        <div class = "row">
-            <div class ="col-3">
-                <a href = "index.hbs"><img id = "logo" src = "img/logo.jpg"></a>
-            </div>
-            <div class = "col-6">
-                <h1>Путешествуйте с нами!</h1>
-            </div>
-            <div class = "col-3">
-                <div id="auth_blok">
-                    <div id="link_regist">
-                        <a href="/create">Регистрация</a>
-                    </div>
-                    <div id="link_avtoriz">
-                        <a href="/avtoriz">Авторизация</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div id ="menu">
-            <nav class = "nav nav-pills flex-column flex-sm-row">
-                <a class = "flex-sm-fill text-sm-center nav-link" href = "index.html">Главная</a>
-                <a class = "flex-sm-fill text-sm-center nav-link" href = "tours.html">Наши туры</a>
-                <a class = "flex-sm-fill text-sm-center nav-link" href = "contacts.html">О нас</a>
-            </nav>
-        </div>
-    </header>
+
    
     <main class = "flex">
         <div class ="row">
@@ -147,44 +112,6 @@
                 </div>
             </div>
         </div>    
-    </main>
-    <footer class = "footer">
-        <div class = "row">
-            <div class = "col">
-                Это сайт, предназначенный для обучения
-            </div>
-        </div>
-    </footer>
-    <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
-    <script src ="js/bootstrap.min.js" > </script>
-    <script>
-        $('#orderForm').on('submit', function()
-        {
-            let tour = $("#inp1").val();
-            let date = new Date($("#inp2").val())
-            let month = date.getMonth();
-            let kol = $("#inp3").val()
-            kol = Number(kol)
-            let email = $("#inp4").val();
-            let stoim = 0;
-            if (tour == "Крым" )
-            {
-                if ((month > 4 ) && (month < 9))
-                {stoim = kol*500}
-                else {stoim = kol * 300}
-            }
-            if (tour == "Кавказ")
-            {
-                if (((month > 4) && (month < 9)) || (month == 12) || (month == 1) || (month == 2))
-                {stoim = kol*300}
-                else {stoim = kol*250}
-            }
-            if (tour =='Алтай')
-            {stoim = kol*1000}
-
-            alert (`Примерная стоимость вашего тура на ${kol} человек составит ${stoim} деняк. МЫ ВАС НАЙДЕМ!!`);
-        }
-        )
-    </script>
+    </main>  
+    
   </body>
-</html>

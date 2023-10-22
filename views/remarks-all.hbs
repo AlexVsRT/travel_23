@@ -1,0 +1,49 @@
+<!--частичное представление						-->
+{{> header}}
+
+<body>
+    <div class="row col-md-10 col-sm-12 col-12 reviews-container">
+        <form action="#" id="review-form" style="display: none;">
+            <div class="row">
+                <div class="col-2 contact-form-cell">
+                    <p>Тема: </p>
+                </div>
+                <div class="col-10 contact-form-cell">
+                    <input type="text" id="review-form-tema-inp">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-2 contact-form-cell">
+                    <p>Отзыв: </p>
+                </div>
+                <div class="col-10 contact-form-cell">
+                    <textarea name="" id="review-form-text-inp" cols="60" rows="5"></textarea>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-2 contact-form-cell"></div>
+                <div class="col-10 reg-button-container contact-form-cell">
+                    <button class="btn btn-primary" id="btn-primary" type="submit">Отправить</button>
+                </div>
+            </div>
+        </form>
+    </div>
+        <div class="remarks">                 
+            <table class="table table-bordered table-dark th"> 
+                <caption style="caption-side: top"><b>Отзывы</b></caption>                                          
+                <thead>                    
+                    <tr>
+                        <th>id_user</th><th>Тема отзыва</th> <th>Описание, впечатления о туре</th>
+                    </tr>
+                </thead>
+                
+                {{#each remarks}}
+                    <tr>
+                        <td>{{this.id_user}}</td>
+                        <td>{{this.tema}}</td>
+                        <td>{{this.text}}</td>                
+                    </tr>
+                {{/each}}
+            </table>
+        </div>      
+</body>
