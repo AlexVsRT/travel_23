@@ -2,8 +2,11 @@ const mysql = require("mysql2"); //подключаем БД
 const express = require("express"); //подключаем фреймворк express
 const expressHbs = require("express-handlebars");
 const hbs = require("hbs");
+const bcrypt = require("bcryptjs"); //для генерации hash-пароля, длина хэша 60, поэтому в БД  поле Pass надо увеличить мин до 60
 
 const app = express(); //создаем объект приложение
+const port = 3000;
+
 
 const urlencodedParser = express.urlencoded({ extended: false });
 //парсер URL – разбирает URL
@@ -47,6 +50,10 @@ app.get("/", function(req, res){
 app.get("/create", function(req, res){
     res.render("create.hbs", {title: "Регистрация"});
 });
+//маршрут на ошибку регистрации - уже есть в базе
+app.get("/createfault", function(req, res){
+    res.render("createfault.hbs", {title: "Ошибка регистрации"});
+});
 // возвращаем браузеру форму для авторизации данных
 app.get("/avtoriz", function (req, res) {
     res.render("avtoriz.hbs", {title: "Авторизация"});
@@ -67,21 +74,52 @@ app.get("/remarks-all", function(req, res){
    res.render("remarks-all.hbs", {title: "Отзывы"});
 });    
 
-//получаем отправленные данные со страницы «Регистрация» create.hbs и добавляем их в БД
+// РЕГИСТРАЦИЯ В БАЗЕ travel В ТАБЛИЦЕ users
+// ===================================================
+//
+
+//получаем отправленные данные из формы со страницы «Регистрация» create.hbs и добавляем их в БД
+//.post(маршрут, разбор URL, функция) 
 app.post("/create", urlencodedParser, function (req, res) {
-    if (!req.body) return res.sendStatus(400);
-    const Name = req.body.name;
-    const Login = req.body.login;
-    const Pass = req.body.pass;
-    pool.query("INSERT INTO users (Name, Login, Pass) VALUES (?,?,?)", [Name, Login, Pass], function (err, data) {
-            if (err) return console.log(err);
-            //пока просто перенаправляем на index.hbs
-            res.redirect("/");
-            //выводим в консоль в случае успеха
-            console.log("Добавил в базу");
-        });
+    try {
+        if (!req.body) {
+            return res.sendStatus(400);
+            console.log("Ошибка при регистрации", err);
+        }
+        //проверяем на дубль         
+        pool.query("SELECT `Name`, `login` FROM users WHERE `Name` = '" + req.body.name + "' OR Login = '" + req.body.login + "'", (err, rows) => {
+            if (err) {
+                res.status(400);
+                console.log("Ошибка при чтении из бд", err);
+            } else if (typeof rows !== 'undefined' && rows.length > 0) {
+                console.log('есть в бд')
+                res.redirect("/createfault");
+                return true;
+
+                //и если нет дубля, добавляем пользователя в БД 				
+            } else {
+                const Name = req.body.name;
+                const Login = req.body.login;
+
+                //генерируем hash-пароль из переданного пороля в реквесте
+                const salt = bcrypt.genSaltSync(7);
+                const Pass = bcrypt.hashSync(req.body.pass, salt);
+                //параметризация ???	
+                pool.query("INSERT INTO users (Name, Login, Pass) VALUES (?,?,?)", [Name, Login, Pass], function (err, data) {
+                    if (err) return console.log(err);
+                    //пока просто перенаправляем на index.hbs, можно добавить иное: страницу, алерт и т.п.
+                    res.redirect("/");
+                    //выводим в консоль в случае успеха
+                    console.log("Добавил в базу");
+                })
+            }
+        })
+    } catch (e) {
+        console.log(e);
+        res.status(400).send('Registration error');
+    }
 });
 
-app.listen(3000, function () {
-    console.log("Сервер ожидает подключения...");
+app.listen(port, function () {
+    console.log(`Сервер ожидает подключения на ${port} порту...`);
 });
