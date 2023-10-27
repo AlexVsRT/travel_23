@@ -141,10 +141,11 @@ app.post("/avtoriz", urlencodedParser, function (req, res) {
                 console.log(`пользователя ${req.body.login} нет в бд`);
                 res.sendStatus(401);
             } else {
-                /*   console.log(`пароль из запроса ${req.body.pass}`);
-                  console.log(result); //что выходит из БД, далее обращение к свойству Pass объекта из массива 
-                  console.log(result[0].Pass); */
-                if (req.body.pass == result[0].Pass) { //простое сравнение пароля полученного из реквеста с БД
+                //сравнение hash-пароля из запроса и полученного хэша пароля объекта из базы, спец.функцией
+                const match = bcrypt.compareSync(req.body.pass, result[0].Pass);
+
+                //Если true мы пускаем юзера 
+                if (match) { 
                     console.log(`Пользователь с таким именем - ${req.body.login} найден в бд, пароль верный`);
                     res.send("Пользователь авторизован").status(200);
                 } else {
