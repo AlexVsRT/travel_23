@@ -3,9 +3,19 @@ const express = require("express"); //подключаем фреймворк ex
 const expressHbs = require("express-handlebars");
 const hbs = require("hbs");
 const bcrypt = require("bcryptjs"); //для генерации hash-пароля, длина хэша 60, поэтому в БД  поле Pass надо увеличить мин до 60
+const jwt = require("jsonwebtoken");
+const JwtStrategy = require("passport-jwt").Strategy; // подключаем passpоrt и стратегию
+const ExtractJwt = require("passport-jwt").ExtractJwt; 
+const passport = require("passport");
 
 const app = express(); //создаем объект приложение
 const port = 3000;
+
+const secretKey = "secret";
+
+let opts = {}; // создаем параметры для работы стратегии c 2 парметрами
+opts.jwtFromRequest = ExtractJwt.fromBodyField("jwt");  //берем из реквеста token
+opts.secretOrKey = secretKey;
 
 
 const urlencodedParser = express.urlencoded({ extended: false });
@@ -145,9 +155,14 @@ app.post("/avtoriz", urlencodedParser, function (req, res) {
                 const match = bcrypt.compareSync(req.body.pass, result[0].Pass);
 
                 //Если true мы пускаем юзера 
-                if (match) { 
-                    console.log(`Пользователь с таким именем - ${req.body.login} найден в бд, пароль верный`);
-                    res.send("Пользователь авторизован").status(200);
+                if (match) {
+                    //генерируем токен
+                    const token = jwt.sign({
+                        id_user: result[0].ID,
+                        login: result[0].Login
+                    }, secretKey, { expiresIn: 120 * 120 });  //можно "1h" и т.п.
+                    res.status(200).json({ name: result[0].Name, token: `${token}` });
+                    console.log(`Пользователь с таким именем - ${req.body.login} найден в бд, пароль верный,  токен +!`);
                 } else {
                     //Выкидываем ошибку что пароль не верный
                     res.status(403).send(`введен не верный пароль`);
