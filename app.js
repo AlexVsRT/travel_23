@@ -120,6 +120,47 @@ app.post("/create", urlencodedParser, function (req, res) {
     }
 });
 
+// АВТОРИЗАЦИЯ НА САЙТЕ ПО ИМЕЮЩЕЙСЯ ИНФОРМАЦИИ В БАЗЕ В ТАБЛИЦЕ users
+// ===================================================
+//
+
+// получаем отправленные данные из формы
+app.post("/avtoriz", urlencodedParser, function (req, res) {
+    try {
+        if (!req.body) {
+            return res.sendStatus(400);
+        }
+        //console.log(`${req.body.login}`);
+        //берем из базы данные по Login  
+        pool.query("SELECT * FROM users WHERE `Login` = '" + req.body.login + "'", (err, result) => {
+            if (err) {
+                res.sendStatus(400);
+                console.log("Ошибка при чтении из бд", err);
+                // проверка наличия в БД, если пустая строка, то нет в БД
+            } else if (result.length <= 0) {
+                console.log(`пользователя ${req.body.login} нет в бд`);
+                res.sendStatus(401);
+            } else {
+                /*   console.log(`пароль из запроса ${req.body.pass}`);
+                  console.log(result); //что выходит из БД, далее обращение к свойству Pass объекта из массива 
+                  console.log(result[0].Pass); */
+                if (req.body.pass == result[0].Pass) { //простое сравнение пароля полученного из реквеста с БД
+                    console.log(`Пользователь с таким именем - ${req.body.login} найден в бд, пароль верный`);
+                    res.send("Пользователь авторизован").status(200);
+                } else {
+                    //Выкидываем ошибку что пароль не верный
+                    res.status(403).send(`введен не верный пароль`);
+                    console.log(`Пользователь с таким именем - ${req.body.login} есть, но пароль не верный!`);
+                }
+            }
+        });
+    } catch (e) {
+        console.log(e);
+        res.status(400).send('Autorization error');
+    }
+});
+
+
 app.listen(port, function () {
     console.log(`Сервер ожидает подключения на ${port} порту...`);
 });
