@@ -2,22 +2,18 @@
 {{> header}}
 
 <body class="body-top">
-    <div class="row col-md-10 col-sm-12 col-12 reviews-container">
+    <div class="row col-md-12 col-sm-12 col-12">
         <form action="#" id="review-form" style="display: none;">
             <div class="row">
-                <div class="col-2 contact-form-cell">
-                    <p>Тема: </p>
-                </div>
-                <div class="col-10 contact-form-cell">
-                    <input type="text" id="review-form-tema-inp">
+                <label for="review-form-tema-inp" class="col-sm-4 col-form-label">Тема: </label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="review-form-tema-inp">
                 </div>
             </div>
             <div class="row">
-                <div class="col-2 contact-form-cell">
-                    <p>Отзыв: </p>
-                </div>
-                <div class="col-10 contact-form-cell">
-                    <textarea name="" id="review-form-text-inp" cols="60" rows="5"></textarea>
+                <label for="review-form-text-inp" class="col-sm-4 col-form-label">Отзыв: </label>
+                <div class="col-sm-10 contact-form-cell">
+                    <textarea name="" id="review-form-text-inp" cols="60" rows="5" class="form-control"></textarea>
                 </div>
             </div>
             <div class="row">
@@ -28,22 +24,91 @@
             </div>
         </form>
     </div>
-        <div class="remarks">                 
-            <table class="table table-bordered table-dark th"> 
-                <caption style="caption-side: top"><b>Отзывы</b></caption>                                          
-                <thead>                    
-                    <tr>
-                        <th>id_user</th><th>Тема отзыва</th> <th>Описание, впечатления о туре</th>
-                    </tr>
-                </thead>
-                
-                {{#each remarks}}
-                    <tr>
-                        <td>{{this.id_user}}</td>
-                        <td>{{this.tema}}</td>
-                        <td>{{this.text}}</td>                
-                    </tr>
-                {{/each}}
-            </table>
-        </div>      
+    <div class="remarks">
+        <table class="table table-bordered table-dark th">
+            <caption style="caption-side: top"><b>Отзывы</b></caption>
+            <thead>
+                <tr>
+                    <th>id_user</th>
+                    <th>Тема отзыва</th>
+                    <th>Описание, впечатления о туре</th>
+                </tr>
+            </thead>
+
+            {{#each remarks}}
+            <tr>
+                <td>{{this.id_user}}</td>
+                <td>{{this.tema}}</td>
+                <td>{{this.text}}</td>
+            </tr>
+            {{/each}}
+        </table>
+    </div>
 </body>
+
+<script>
+    //видимоcть блока для авторизованных
+    if (userName !== null) {
+        document.getElementById("review-form").style.display = "block";
+    };
+
+    //отлавливание кнопки "выход" с header  => сокрытие блока для добавки отзыва
+    document.getElementById("logOut").addEventListener("click", e => {
+        e.preventDefault();
+        document.getElementById("review-form").style.display = "none";
+    });
+
+
+    //--------------
+    //добавление отзывов в таблицу remarks для авторизованными пользователей
+    //--------------
+    //перехватываем данные из формы
+    document.getElementById("btn-primary").addEventListener("click", e => {
+        e.preventDefault();
+        // получаем данные формы для ввода отзыва
+        let avtorizForm = document.forms["review-form"];
+        let tema_inp = avtorizForm.elements["review-form-tema-inp"].value;
+        let text_inp = avtorizForm.elements["review-form-text-inp"].value;
+        let jwt = localStorage.getItem("token");
+        if (!jwt) {
+            //маршрут на авторизацию
+            return null;
+        }
+        //формируем тело запроса, но теперь в json   
+        var body = `{
+                    "jwt": "${localStorage.getItem("token")}",
+                    "tema": "${tema_inp}",
+                    "text": "${text_inp}"
+                }`;
+        
+        
+        //делаем ajax POST запрос к серверу
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", '/remarks-all', true);
+        xhr.setRequestHeader("Accept", "application/json");
+        xhr.setRequestHeader('Content-Type', "application/json");
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                //    console.log(xhr.status);
+                //    console.log(xhr.responseText);
+
+                if (xhr.status == 200) {
+                    //добавить отзыв
+                    console.log("отзыв в БД внесен");
+                    console.log(body);
+                    window.location.reload();
+
+                    //далее if возможно лишние, т.к. авторизация происходит раньше, неавторизованный просто не видит эту форму
+                } else if (xhr.status == 403 || xhr.status == 401) {
+                    //видимость блока об ошибке 
+
+                } else {
+                    //
+                    ;
+                }
+            }
+        }
+        xhr.send(body);
+    });
+</script>

@@ -5,7 +5,7 @@ const hbs = require("hbs");
 const bcrypt = require("bcryptjs"); //для генерации hash-пароля, длина хэша 60, поэтому в БД  поле Pass надо увеличить мин до 60
 const jwt = require("jsonwebtoken");
 const JwtStrategy = require("passport-jwt").Strategy; // подключаем passpоrt и стратегию
-const ExtractJwt = require("passport-jwt").ExtractJwt; 
+const ExtractJwt = require("passport-jwt").ExtractJwt;
 const passport = require("passport");
 
 const app = express(); //создаем объект приложение
@@ -17,9 +17,16 @@ let opts = {}; // создаем параметры для работы стра
 opts.jwtFromRequest = ExtractJwt.fromBodyField("jwt");  //берем из реквеста token
 opts.secretOrKey = secretKey;
 
+//создаем стратегию
+passport.use(new JwtStrategy(opts, (jwt_payload, done) => {
+    return done(null, jwt_payload.login);
+}));
 
-const urlencodedParser = express.urlencoded({ extended: false });
 //парсер URL – разбирает URL
+const urlencodedParser = express.urlencoded({ extended: false });
+
+// создаем парсер для данных в формате json
+const bodyParser = express.json();
 
 // сообщаем Node где лежат ресурсы сайта
 app.use(express.static(__dirname + '/public'));
@@ -34,15 +41,15 @@ const pool = mysql.createPool({
 });
 
 // устанавливаем настройки для файлов layout
-app.engine("hbs", expressHbs.engine( 
+app.engine("hbs", expressHbs.engine(
     //expressHbs.engine() осуществляет конфигурацию движка
-{
-layoutsDir: "views/layouts", 
-//задает путь к папке с файлами layout относительно корня каталога проекта
-defaultLayout: "layout", 
-//указывает на название файла шаблона
- extname: "hbs" //задает расширение файлов
-}
+    {
+        layoutsDir: "views/layouts",
+        //задает путь к папке с файлами layout относительно корня каталога проекта
+        defaultLayout: "layout",
+        //указывает на название файла шаблона
+        extname: "hbs" //задает расширение файлов
+    }
 ))
 
 //устанавливаем Handlebars в качестве движка представлений в Express
@@ -53,36 +60,31 @@ app.set("view engine", "hbs");
 // 
 
 // маршурут на главную страницу
-app.get("/", function(req, res){
-    res.render("index.hbs", {title: "travel"});
+app.get("/", function (req, res) {
+    res.render("index.hbs", { title: "travel" });
 });
 // возвращаем форму для добавления данных
-app.get("/create", function(req, res){
-    res.render("create.hbs", {title: "Регистрация"});
+app.get("/create", function (req, res) {
+    res.render("create.hbs", { title: "Регистрация" });
 });
 //маршрут на ошибку регистрации - уже есть в базе
-app.get("/createfault", function(req, res){
-    res.render("createfault.hbs", {title: "Ошибка регистрации"});
+app.get("/createfault", function (req, res) {
+    res.render("createfault.hbs", { title: "Ошибка регистрации" });
 });
 // возвращаем браузеру форму для авторизации данных
 app.get("/avtoriz", function (req, res) {
-    res.render("avtoriz.hbs", {title: "Авторизация"});
+    res.render("avtoriz.hbs", { title: "Авторизация" });
 });
 
 // возвращаем форму с турами
-app.get("/tours", function(req, res){
-    res.render("tours.hbs", {title: "Наши туры"});
-    });
+app.get("/tours", function (req, res) {
+    res.render("tours.hbs", { title: "Наши туры" });
+});
 
 // возвращаем форму о нас
-app.get("/contacts", function(req, res){
-    res.render("contacts.hbs", {title: "О нас"});
-    });
- 
-// возвращаем форму с отзывами
-app.get("/remarks-all", function(req, res){
-   res.render("remarks-all.hbs", {title: "Отзывы"});
-});    
+app.get("/contacts", function (req, res) {
+    res.render("contacts.hbs", { title: "О нас" });
+});
 
 // РЕГИСТРАЦИЯ В БАЗЕ travel В ТАБЛИЦЕ users
 // ===================================================
@@ -176,6 +178,49 @@ app.post("/avtoriz", urlencodedParser, function (req, res) {
     }
 });
 
+/// РАБОТА С ТАБЛЦЕЙ remarks для ОТЗЫВОВ
+// ===================================================
+//
+
+//маршрут на страницу с отзывами
+app.get("/remarks-all", (req, res) => {
+    pool.query(`SELECT * FROM remarks`, (err, rows) => {
+        if (err) {
+            console.log(err);
+            return res.sendStatus(500);
+        } else {
+            res.status(200).render("remarks-all.hbs", {
+                title: "Отзывы",
+                remarks: rows
+            });
+            //можно отдавать даные в json
+            //res.status(200).json(data);
+        }
+    });
+});
+
+app.post("/remarks-all", bodyParser, passport.authenticate("jwt", { session: false }), (req, res) => {
+    // console.log(req.body);
+    if (!req.body || !req.body.tema || !req.body.text) {
+        return res.sendStatus(400);
+    }
+    pool.query(`SELECT id FROM users WHERE login='${req.user}'`, (err, rows, fields) => {
+        if (err) {
+            console.log(err);
+            return res.sendStatus(500);
+        } else {
+            let id = rows[0].id;
+            pool.query(`INSERT INTO remarks (id_user, tema, text) VALUES (${id},'${req.body.tema}','${req.body.text}')`, (err, rows, fields) => {
+                if (err) {
+                    console.log(err);
+                    return res.sendStatus(500);
+                } else {
+                    return res.sendStatus(200)//.render("remarks-all.hbs");
+                }
+            });
+        }
+    });
+});
 
 app.listen(port, function () {
     console.log(`Сервер ожидает подключения на ${port} порту...`);
