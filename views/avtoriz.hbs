@@ -8,7 +8,7 @@
 <form method="POST" id="avtorizForm">
     <p>
         <label> Ваш логин:<br></label>
-        <input name="login" type="text" size="30" maxlength="30">
+        <input name="login" type="text" size="30" maxlength="30" autofocus="autofocus">
     </p>
     <p>
         <label> Ваш пароль:<br></label>
@@ -20,6 +20,11 @@
     <div id="wrong-pass-message" style="display: none;">
         <p>
         <h3>Введен неверный логин или пароль</h3>
+        </p>
+    </div>
+    <div id="wrong-bd" style="display: none;">
+        <p>
+        <h3>ошибка при обращении к серверу БД</h3>
         </p>
     </div>
 </form>
@@ -51,7 +56,7 @@
                 console.log(xhr.status);
                 console.log(xhr.responseText);
                 if (xhr.status == 200) {
-                    let res = JSON.parse(xhr.responseText);
+                    let res = JSON.parse(xhr.responseText); //или задать xhr.responseType = 'json';
                     let name = res.name;
                     let jwt = res.token;
                     localStorage.setItem("name", name);
@@ -64,9 +69,9 @@
                 } else if (xhr.status == 403 || xhr.status == 401) {
                     //видимость блока об ошибке 
                     $("#wrong-pass-message").show();
-                } else {
-                    //маршрут на отзывы с возможностью добавления
-                    ;
+                } else if (xhr.status == 500){
+                    //видимость блока 
+                    $("#wrong-bd").show();
                 }
             }
         }

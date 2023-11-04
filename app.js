@@ -146,7 +146,7 @@ app.post("/avtoriz", urlencodedParser, function (req, res) {
         //берем из базы данные по Login  
         pool.query("SELECT * FROM users WHERE `Login` = '" + req.body.login + "'", (err, result) => {
             if (err) {
-                res.sendStatus(400);
+                res.sendStatus(500);
                 console.log("Ошибка при чтении из бд", err);
                 // проверка наличия в БД, если пустая строка, то нет в БД
             } else if (result.length <= 0) {

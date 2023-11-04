@@ -89,7 +89,7 @@ html{
     margin-left: 10%;
     text-align: left;
 }
-.table tr td{
+.table tr td, .table tr th{
     border:#007196;
     border-width: 5px;
     border-style:solid;
