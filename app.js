@@ -187,7 +187,7 @@ app.get("/remarks-all", (req, res) => {
     pool.query(`SELECT * FROM remarks`, (err, rows) => {
         if (err) {
             console.log(err);
-            return res.sendStatus(500);
+            return res.send('<h2>внутренняя ошибка сервера, сервер БД не запущен?</h2><a style="background-color: #66CDAA" href="/">На главную страницу</a>').status(500);
         } else {
             res.status(200).render("remarks-all.hbs", {
                 title: "Отзывы",
